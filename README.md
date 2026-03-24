@@ -1,204 +1,144 @@
-# 🚦 SmartTrafficSystem — Sistem Lampu Lalu Lintas Cerdas V1.0
+# 🚦 Sistem Lampu Lalu Lintas Cerdas V1.0
 
-Simulasi sistem lampu lalu lintas berbasis Java yang menghitung durasi lampu hijau secara dinamis berdasarkan kepadatan kendaraan di setiap lajur jalan.
-
----
-
-## 📋 Daftar Isi
-
-- [Deskripsi Proyek](#deskripsi-proyek)
-- [Struktur Kode](#struktur-kode)
-- [Penjelasan Komponen](#penjelasan-komponen)
-- [Logika Kalkulasi](#logika-kalkulasi)
-- [Cara Menjalankan](#cara-menjalankan)
-- [Contoh Output](#contoh-output)
-- [Diagram Arsitektur](#diagram-arsitektur)
+Simulasi sistem kontrol lampu lalu lintas adaptif berbasis **Object-Oriented Programming (OOP)** menggunakan Java. Sistem menghitung durasi lampu hijau secara dinamis berdasarkan kepadatan dan jenis kendaraan pada setiap lajur jalan.
 
 ---
 
-## Deskripsi Proyek
+## 📋 Deskripsi Kasus
 
-`SmartTrafficSystem` adalah program Java yang mensimulasikan sistem lalu lintas cerdas (*smart traffic*). Alih-alih menggunakan durasi lampu hijau yang tetap (timer statis), sistem ini menghitung durasi secara dinamis berdasarkan **total panjang kendaraan** yang mengantri di setiap lajur.
+Persimpangan jalan memiliki beberapa lajur dengan kepadatan kendaraan yang berbeda-beda. Sistem ini mensimulasikan:
 
-Semakin panjang antrean kendaraan → semakin lama lampu hijau menyala.
+- Pengelolaan **antrean kendaraan** pada tiap lajur secara independen
+- Deteksi **jenis kendaraan** (Mobil, Motor, Bus) dengan ukuran fisik berbeda
+- Perhitungan **rekomendasi durasi lampu hijau** secara adaptif
+- Batas aman durasi: **minimum 10 detik**, **maksimum 60 detik**
+
+### Skenario Simulasi
+
+| Lajur | Kendaraan | Total Panjang | Durasi Hijau |
+|---|---|---|---|
+| Arah Utara (Jl. Manyar) | Mobil, Bus, Mobil, Motor | 24 meter | **12 detik** |
+| Arah Selatan (Jl. Gebang) | Motor, Motor | 4 meter | **10 detik** (minimum) |
+
+> **Kesimpulan:** Lajur Utara mendapat durasi lebih lama karena beban kendaraannya lebih besar.
 
 ---
 
-## Struktur Kode
+## 🗂️ Class Diagram
 
 ```
-SmartTrafficSystem.java
-│
-├── 📌 interface KontrolLampu
-│     └── hitungDurasiHijau()
-│
-├── 📦 abstract class Kendaraan
-│     ├── class Mobil   → panjang: 5 meter
-│     ├── class Motor   → panjang: 2 meter
-│     └── class Bus     → panjang: 12 meter
-│
-├── 🛣️  class LajurJalan  (implements KontrolLampu)
-│     ├── tambahKendaraan()
-│     ├── hitungDurasiHijau()
-│     └── infoLajur()
-│
-└── 🚀 class SmartTrafficSystem (main)
+<img width="3162" height="4430" alt="Untitled diagram-2026-03-24-193447" src="https://github.com/user-attachments/assets/84e6e9ba-8395-40c2-b3a6-d9e6a60f1170" />
+
 ```
 
 ---
 
-## Penjelasan Komponen
-
-### 1. `interface KontrolLampu`
-
-Kontrak yang wajib dipenuhi oleh semua kelas yang mengelola lampu lalu lintas.
+## 💻 Kode Program Java
 
 ```java
+import java.util.ArrayList;
+import java.util.List;
+
+// --- 1. INTERFACE ---
 interface KontrolLampu {
-    int hitungDurasiHijau(); // Menghasilkan durasi dalam detik
+    int hitungDurasiHijau(); // Menghasilkan detik
 }
-```
 
-> Setiap implementor **wajib** mendefinisikan cara menghitung durasi hijau.
-
----
-
-### 2. `abstract class Kendaraan`
-
-Kelas dasar untuk semua jenis kendaraan. Menyimpan `id` kendaraan dan memaksa subclass untuk mendefinisikan panjangnya masing-masing.
-
-```java
+// --- 2. ABSTRACT CLASS ---
 abstract class Kendaraan {
     protected String id;
-    public abstract int getPanjang(); // Wajib diimplementasikan subclass
+    protected int panjang; // dalam satuan meter
+
+    public Kendaraan(String id) {
+        this.id = id;
+    }
+
+    public abstract int getPanjang();
+    public String getId() { return id; }
 }
-```
 
----
+// --- 3. SUBCLASSES ---
+class Mobil extends Kendaraan {
+    public Mobil(String id) { super(id); }
+    @Override
+    public int getPanjang() { return 5; } // Mobil rata-rata 5 meter
+}
 
-### 3. Subclass Kendaraan
+class Motor extends Kendaraan {
+    public Motor(String id) { super(id); }
+    @Override
+    public int getPanjang() { return 2; } // Motor 2 meter
+}
 
-Tiga jenis kendaraan dengan panjang masing-masing yang sudah ditentukan:
-
-| Kelas   | Jenis    | Panjang |
-|---------|----------|---------|
-| `Mobil` | Kendaraan pribadi | **5 meter** |
-| `Motor` | Sepeda motor | **2 meter** |
-| `Bus`   | Kendaraan besar | **12 meter** |
-
-Contoh deklarasi:
-
-```java
 class Bus extends Kendaraan {
     public Bus(String id) { super(id); }
-
     @Override
-    public int getPanjang() { return 12; }
+    public int getPanjang() { return 12; } // Bus 12 meter
 }
-```
 
----
-
-### 4. `class LajurJalan` *(inti sistem)*
-
-Kelas ini merepresentasikan satu lajur jalan dan mengimplementasikan `KontrolLampu`.
-
-```java
+// --- 4. SISTEM LAJUR (IMPLEMENTASI LOGIKA) ---
 class LajurJalan implements KontrolLampu {
     private String namaArah;
     private List<Kendaraan> antrean = new ArrayList<>();
 
-    public void tambahKendaraan(Kendaraan k) { ... }
-
-    @Override
-    public int hitungDurasiHijau() { ... }
-
-    public void infoLajur() { ... }
-}
-```
-
-**Method penting:**
-
-| Method | Fungsi |
-|--------|--------|
-| `tambahKendaraan(Kendaraan k)` | Menambahkan kendaraan ke antrean lajur |
-| `hitungDurasiHijau()` | Menghitung dan mengembalikan durasi lampu hijau (detik) |
-| `infoLajur()` | Menampilkan nama lajur dan jumlah kendaraan |
-
----
-
-## Logika Kalkulasi
-
-Rumus utama untuk menghitung durasi lampu hijau:
-
-```
-Durasi (detik) = Total Panjang Kendaraan (meter) / 2
-```
-
-Dengan batasan:
-
-```
-Minimal  : 10 detik  (agar kendaraan tetap bisa jalan meski lajur sepi)
-Maksimal : 60 detik  (agar tidak menghambat lajur lain terlalu lama)
-```
-
-**Implementasi dalam kode:**
-
-```java
-@Override
-public int hitungDurasiHijau() {
-    int totalPanjang = 0;
-    for (Kendaraan k : antrean) {
-        totalPanjang += k.getPanjang();
+    public LajurJalan(String namaArah) {
+        this.namaArah = namaArah;
     }
 
-    int durasi = totalPanjang / 2;
+    public void tambahKendaraan(Kendaraan k) {
+        antrean.add(k);
+    }
 
-    if (durasi < 10) return 10;
-    if (durasi > 60) return 60;
-    return durasi;
+    @Override
+    public int hitungDurasiHijau() {
+        int totalPanjang = 0;
+        for (Kendaraan k : antrean) {
+            totalPanjang += k.getPanjang();
+        }
+        // Durasi hijau = Total panjang / 2 (1 detik per 2 meter kendaraan)
+        // Minimal 10 detik, Maksimal 60 detik
+        int durasi = totalPanjang / 2;
+        if (durasi < 10) return 10;
+        if (durasi > 60) return 60;
+        return durasi;
+    }
+
+    public void infoLajur() {
+        System.out.println("Lajur: " + namaArah + " | Jumlah Kendaraan: " + antrean.size());
+    }
+}
+
+// --- 5. MAIN RUNNER ---
+public class SmartTrafficSystem {
+    public static void main(String[] args) {
+        System.out.println("=== SISTEM LAMPU LALU LINTAS CERDAS V1.0 ===\n");
+
+        LajurJalan lajurUtara  = new LajurJalan("Arah Utara (Jl. Manyar)");
+        LajurJalan lajurSelatan = new LajurJalan("Arah Selatan (Jl. Gebang)");
+
+        // Simulasi Lajur Utara (Padat)
+        lajurUtara.tambahKendaraan(new Mobil("L-1234-AB"));
+        lajurUtara.tambahKendaraan(new Bus("L-7788-BUS"));
+        lajurUtara.tambahKendaraan(new Mobil("W-9901-XY"));
+        lajurUtara.tambahKendaraan(new Motor("L-4421-SS"));
+
+        // Simulasi Lajur Selatan (Sepi)
+        lajurSelatan.tambahKendaraan(new Motor("L-5562-ZZ"));
+        lajurSelatan.tambahKendaraan(new Motor("L-1122-AA"));
+
+        lajurUtara.infoLajur();
+        System.out.println("Rekomendasi Lampu Hijau: " + lajurUtara.hitungDurasiHijau() + " detik.");
+        System.out.println("--------------------------------------------");
+        lajurSelatan.infoLajur();
+        System.out.println("Rekomendasi Lampu Hijau: " + lajurSelatan.hitungDurasiHijau() + " detik.");
+        System.out.println("\n[KESIMPULAN] Sistem memberikan durasi lebih lama pada Lajur Utara karena beban jalan lebih besar.");
+    }
 }
 ```
 
-**Contoh kalkulasi (Lajur Utara):**
-
-```
-Kendaraan  : Mobil (5) + Bus (12) + Mobil (5) + Motor (2) = 24 meter
-Durasi     : 24 / 2 = 12 detik
-Hasil      : 12 detik ✅ (dalam rentang 10–60)
-```
-
-**Contoh kalkulasi (Lajur Selatan):**
-
-```
-Kendaraan  : Motor (2) + Motor (2) = 4 meter
-Durasi     : 4 / 2 = 2 detik → di bawah minimum!
-Hasil      : 10 detik ✅ (dibulatkan ke minimum)
-```
-
 ---
 
-## Cara Menjalankan
-
-### Prasyarat
-
-- Java Development Kit (JDK) versi **8 atau lebih baru**
-
-### Langkah Kompilasi dan Eksekusi
-
-```bash
-# 1. Simpan file sebagai SmartTrafficSystem.java
-
-# 2. Kompilasi
-javac SmartTrafficSystem.java
-
-# 3. Jalankan
-java SmartTrafficSystem
-```
-
----
-
-## Contoh Output
+## 🖥️ Screenshot Output
 
 ```
 === SISTEM LAMPU LALU LINTAS CERDAS V1.0 ===
@@ -212,59 +152,91 @@ Rekomendasi Lampu Hijau: 10 detik.
 [KESIMPULAN] Sistem memberikan durasi lebih lama pada Lajur Utara karena beban jalan lebih besar.
 ```
 
----
+### Cara Menjalankan
 
-## Diagram Arsitektur
+```bash
+# Compile
+javac SmartTrafficSystem.java
 
-```
-         ┌──────────────────────────────┐
-         │      «interface»             │
-         │      KontrolLampu            │
-         │  + hitungDurasiHijau(): int  │
-         └──────────────┬───────────────┘
-                        │ implements
-                        ▼
-         ┌──────────────────────────────┐
-         │        LajurJalan            │
-         │  - namaArah: String          │
-         │  - antrean: List<Kendaraan>  │
-         │  + tambahKendaraan()         │
-         │  + hitungDurasiHijau(): int  │
-         │  + infoLajur()               │
-         └──────────────┬───────────────┘
-                        │ menggunakan
-                        ▼
-         ┌──────────────────────────────┐
-         │    «abstract» Kendaraan      │
-         │  # id: String                │
-         │  + getPanjang(): int         │
-         └───────┬──────────┬───────────┘
-                 │          │
-        ┌────────┘    ┌─────┘─────────┐
-        ▼             ▼               ▼
-   ┌─────────┐  ┌─────────┐     ┌─────────┐
-   │  Mobil  │  │  Motor  │     │   Bus   │
-   │  5 mtr  │  │  2 mtr  │     │ 12 mtr  │
-   └─────────┘  └─────────┘     └─────────┘
+# Run
+java SmartTrafficSystem
 ```
 
 ---
 
-## Konsep OOP yang Digunakan
+## 🧩 Prinsip-Prinsip OOP yang Diterapkan
 
-| Konsep | Implementasi |
-|--------|-------------|
-| **Abstraksi** | `abstract class Kendaraan` dan `interface KontrolLampu` |
-| **Pewarisan (Inheritance)** | `Mobil`, `Motor`, `Bus` mewarisi `Kendaraan` |
-| **Polimorfisme** | `getPanjang()` berbeda di tiap subclass |
-| **Enkapsulasi** | Field `antrean` bersifat `private` di `LajurJalan` |
+### 1. 🔒 Enkapsulasi (Encapsulation)
+Atribut kelas disembunyikan dari akses luar menggunakan access modifier.
+
+- `LajurJalan` memiliki `private namaArah` dan `private List<Kendaraan> antrean` — hanya bisa diakses melalui method publik `tambahKendaraan()` dan `infoLajur()`
+- `Kendaraan` menggunakan `protected id` sehingga hanya subclass yang bisa mengaksesnya langsung
+- Data internal terlindungi dari manipulasi langsung luar kelas
+
+### 2. 🧬 Pewarisan (Inheritance)
+Subclass mewarisi properti dan method dari abstract class `Kendaraan`.
+
+- `Mobil`, `Motor`, dan `Bus` semuanya `extends Kendaraan` — mewarisi atribut `id` dan method `getId()`
+- Setiap subclass hanya perlu mengimplementasikan `getPanjang()` sesuai karakteristiknya
+- Menghindari duplikasi kode (prinsip DRY)
+
+### 3. 🔄 Polimorfisme (Polymorphism)
+Objek dari berbagai subclass diperlakukan secara seragam melalui tipe referensi parent.
+
+- `List<Kendaraan>` di `LajurJalan` menyimpan `Mobil`, `Motor`, dan `Bus` dalam satu koleksi
+- Pemanggilan `k.getPanjang()` secara otomatis memanggil implementasi yang tepat sesuai tipe objek nyatanya *(runtime polymorphism / dynamic dispatch)*
+- Menambah jenis kendaraan baru tidak memerlukan perubahan logika `LajurJalan`
+
+### 4. 🎭 Abstraksi (Abstraction)
+Detail implementasi disembunyikan, hanya kontrak yang diekspos.
+
+- `interface KontrolLampu` mendefinisikan kontrak `hitungDurasiHijau()` tanpa mengekspos caranya
+- `abstract class Kendaraan` memaksa setiap subclass mendefinisikan `getPanjang()` sendiri
+- `SmartTrafficSystem` berinteraksi dengan `LajurJalan` tanpa perlu tahu detail kalkulasinya
 
 ---
 
-## Kemungkinan Pengembangan
+## ✨ Keunikan yang Membedakan
 
-- [ ] Menambahkan lebih banyak jenis kendaraan (Truk, Ambulans, dll.)
-- [ ] Sistem prioritas untuk kendaraan darurat
-- [ ] Simulasi multi-lajur dengan sinkronisasi antar persimpangan
-- [ ] Antarmuka grafis (GUI) untuk visualisasi lalu lintas
-- [ ] Integrasi sensor real-time
+### 1. Algoritma Berbasis Panjang Fisik Kendaraan
+Kebanyakan implementasi hanya menghitung **jumlah** kendaraan. Sistem ini menggunakan **total panjang fisik** (meter) sebagai dasar perhitungan:
+
+```
+Durasi Hijau = Total Panjang Kendaraan (meter) / 2
+```
+
+| Kendaraan | Panjang | Kontribusi Durasi |
+|---|---|---|
+| Motor | 2 meter | +1 detik |
+| Mobil | 5 meter | +2.5 detik |
+| Bus | 12 meter | +6 detik |
+
+> Bus berkontribusi 6× lebih besar dari motor — lebih realistis secara fisik.
+
+### 2. Arsitektur Berlapis yang Bersih
+Pemisahan tanggung jawab yang tegas *(Separation of Concerns)*:
+
+- **`KontrolLampu`** → Kontrak: strategi perhitungan bisa diganti tanpa ubah struktur
+- **`Kendaraan`** → Blueprint: menjamin konsistensi antar semua tipe kendaraan
+- **`LajurJalan`** → Agregator: mengelola kendaraan sekaligus menghitung durasi
+
+### 3. Skalabilitas Tinggi (Open/Closed Principle)
+- Tambah kendaraan baru (misal `Truk`, `Sepeda`) → cukup buat subclass baru
+- Tambah lajur baru (misal Timur, Barat) → cukup instansiasi `LajurJalan` baru
+- Tidak ada satu baris pun di kelas lain yang perlu diubah
+
+### 4. Simulasi Identitas Kendaraan Realistis
+Setiap kendaraan memiliki ID berformat **plat nomor Indonesia** (contoh: `L-1234-AB`, `W-9901-XY`), membuat simulasi lebih autentik dan mudah dilacak saat debugging.
+
+---
+
+## 📁 Struktur File
+
+```
+SmartTrafficSystem/
+└── SmartTrafficSystem.java   # Semua kelas dalam satu file
+```
+
+---
+
+*Dibuat sebagai implementasi konsep OOP di Java — 2026*
