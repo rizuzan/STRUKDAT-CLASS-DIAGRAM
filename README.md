@@ -1,10 +1,10 @@
-# 🚦 Sistem Lampu Lalu Lintas Cerdas V1.0
+# Sistem Lampu Lalu Lintas Cerdas 
 
 Simulasi sistem kontrol lampu lalu lintas adaptif berbasis **Object-Oriented Programming (OOP)** menggunakan Java. Sistem menghitung durasi lampu hijau secara dinamis berdasarkan kepadatan dan jenis kendaraan pada setiap lajur jalan.
 
 ---
 
-## 📋 Deskripsi Kasus
+## Deskripsi Kasus
 
 Persimpangan jalan memiliki beberapa lajur dengan kepadatan kendaraan yang berbeda-beda. Sistem ini mensimulasikan:
 
@@ -24,13 +24,13 @@ Persimpangan jalan memiliki beberapa lajur dengan kepadatan kendaraan yang berbe
 
 ---
 
-## 🗂️ Class Diagram
+## Class Diagram
 
 <img width="3162" height="4430" alt="Untitled diagram-2026-03-24-193447" src="https://github.com/user-attachments/assets/f23d8b42-b81d-4763-8c8f-94122ad9821f" />
 
 ---
 
-## 💻 Kode Program Java
+## Kode Program Java
 
 ```java
 import java.util.ArrayList;
@@ -135,7 +135,7 @@ public class SmartTrafficSystem {
 
 ---
 
-## 🖥️ Screenshot Output
+## Screenshot Output
 
 ```
 === SISTEM LAMPU LALU LINTAS CERDAS V1.0 ===
@@ -161,30 +161,30 @@ java SmartTrafficSystem
 
 ---
 
-## 🧩 Prinsip-Prinsip OOP yang Diterapkan
+## Prinsip-Prinsip OOP yang Diterapkan
 
-### 1. 🔒 Enkapsulasi (Encapsulation)
+### 1. Enkapsulasi (Encapsulation)
 Atribut kelas disembunyikan dari akses luar menggunakan access modifier.
 
 - `LajurJalan` memiliki `private namaArah` dan `private List<Kendaraan> antrean` — hanya bisa diakses melalui method publik `tambahKendaraan()` dan `infoLajur()`
 - `Kendaraan` menggunakan `protected id` sehingga hanya subclass yang bisa mengaksesnya langsung
 - Data internal terlindungi dari manipulasi langsung luar kelas
 
-### 2. 🧬 Pewarisan (Inheritance)
+### 2. Pewarisan (Inheritance)
 Subclass mewarisi properti dan method dari abstract class `Kendaraan`.
 
 - `Mobil`, `Motor`, dan `Bus` semuanya `extends Kendaraan` — mewarisi atribut `id` dan method `getId()`
 - Setiap subclass hanya perlu mengimplementasikan `getPanjang()` sesuai karakteristiknya
 - Menghindari duplikasi kode (prinsip DRY)
 
-### 3. 🔄 Polimorfisme (Polymorphism)
+### 3. Polimorfisme (Polymorphism)
 Objek dari berbagai subclass diperlakukan secara seragam melalui tipe referensi parent.
 
 - `List<Kendaraan>` di `LajurJalan` menyimpan `Mobil`, `Motor`, dan `Bus` dalam satu koleksi
 - Pemanggilan `k.getPanjang()` secara otomatis memanggil implementasi yang tepat sesuai tipe objek nyatanya *(runtime polymorphism / dynamic dispatch)*
 - Menambah jenis kendaraan baru tidak memerlukan perubahan logika `LajurJalan`
 
-### 4. 🎭 Abstraksi (Abstraction)
+### 4. Abstraksi (Abstraction)
 Detail implementasi disembunyikan, hanya kontrak yang diekspos.
 
 - `interface KontrolLampu` mendefinisikan kontrak `hitungDurasiHijau()` tanpa mengekspos caranya
@@ -193,7 +193,7 @@ Detail implementasi disembunyikan, hanya kontrak yang diekspos.
 
 ---
 
-## ✨ Keunikan yang Membedakan
+## Keunikan yang Membedakan
 
 ### 1. Algoritma Berbasis Panjang Fisik Kendaraan
 Kebanyakan implementasi hanya menghitung **jumlah** kendaraan. Sistem ini menggunakan **total panjang fisik** (meter) sebagai dasar perhitungan:
@@ -227,7 +227,7 @@ Setiap kendaraan memiliki ID berformat **plat nomor Indonesia** (contoh: `L-1234
 
 ---
 
-## 📁 Struktur File
+## Struktur File
 
 ```
 SmartTrafficSystem/
@@ -236,4 +236,4 @@ SmartTrafficSystem/
 
 ---
 
-*Dibuat sebagai implementasi konsep OOP di Java — 2026*
+
