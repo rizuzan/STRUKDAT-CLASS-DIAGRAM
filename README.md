@@ -26,11 +26,7 @@ Persimpangan jalan memiliki beberapa lajur dengan kepadatan kendaraan yang berbe
 
 ## 🗂️ Class Diagram
 
-```
-<img width="3162" height="4430" alt="Untitled diagram-2026-03-24-193447" src="https://github.com/user-attachments/assets/473e5f9e-22a8-4699-b5db-01467fcb3930" />
-
-
-```
+<img width="3162" height="4430" alt="Untitled diagram-2026-03-24-193447" src="https://github.com/user-attachments/assets/f23d8b42-b81d-4763-8c8f-94122ad9821f" />
 
 ---
 
