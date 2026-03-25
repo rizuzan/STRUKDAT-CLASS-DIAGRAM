@@ -8,32 +8,32 @@ interface KontrolLampu {
 
 // --- 2. ABSTRACT CLASS ---
 abstract class Kendaraan {
-    protected String id;
+    protected String plat;
     protected int panjang; // dalam satuan meter
 
-    public Kendaraan(String id) {
-        this.id = id;
+    public Kendaraan(String plat) {
+        this.plat = plat;
     }
 
     public abstract int getPanjang();
-    public String getId() { return id; }
+    public String getId() { return plat; }
 }
 
 // --- 3. SUBCLASSES ---
 class Mobil extends Kendaraan {
-    public Mobil(String id) { super(id); }
+    public Mobil(String plat) { super(plat); }
     @Override
     public int getPanjang() { return 5; } // Mobil rata-rata 5 meter
 }
 
 class Motor extends Kendaraan {
-    public Motor(String id) { super(id); }
+    public Motor(String plat) { super(plat); }
     @Override
     public int getPanjang() { return 2; } // Motor 2 meter
 }
 
 class Bus extends Kendaraan {
-    public Bus(String id) { super(id); }
+    public Bus(String plat) { super(plat); }
     @Override
     public int getPanjang() { return 12; } // Bus 12 meter
 }
@@ -76,7 +76,7 @@ class LajurJalan implements KontrolLampu {
 // --- 5. MAIN RUNNER ---
 public class SmartTrafficSystem {
     public static void main(String[] args) {
-        System.out.println("=== SISTEM LAMPU LALU LINTAS CERDAS V1.0 ===\n");
+        System.out.println("=== SISTEM LAMPU LALU LINTAS CERDAS ===\n");
 
         // Membuat 2 Lajur (Contoh: Utara dan Selatan)
         LajurJalan lajurUtara = new LajurJalan("Arah Utara (Jl. Manyar)");
