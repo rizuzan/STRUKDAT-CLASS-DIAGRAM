@@ -235,12 +235,6 @@ Setiap kendaraan memiliki ID berformat **plat nomor Indonesia** (contoh: `L-1234
 
 ---
 
-## Struktur File
-
-```
-SmartTrafficSystem/
-└── SmartTrafficSystem.java   # Semua kelas dalam satu file
-```
 
 ---
 
